@@ -71,6 +71,8 @@ import { LayaGL } from "../../../layagl/LayaGL";
 import { Laya3DRender } from "../../RenderObjs/Laya3DRender";
 import { IElementComponentManager } from "./IScenceComponentManager";
 import { ISceneRenderManager } from "../../../RenderEngine/RenderInterface/RenderPipelineInterface/ISceneRenderManager";
+import { regClass } from "../../../../Decorators";
+import { PERF_BEGIN, PERF_END } from "../../PerformanceTool";
 
 export enum FogMode {
     Linear = 0, //Linear
@@ -401,7 +403,7 @@ export class Scene3D extends Sprite implements ISubmit {
     /**@internal */
     private _physicsStepTime: number = 0;
     /**@internal */
-    _lightmapDirtyFlag:number = -1
+    _lightmapDirtyFlag: number = -1
     /**@internal */
     _sunColor: Color = new Color(1.0, 1.0, 1.0);
     /**@interanl */
@@ -1501,18 +1503,25 @@ export class Scene3D extends Sprite implements ISubmit {
         }
     }
 
+    static Scene3DRenderAll: string;
     /**
      * 渲染入口
      */
+    //@regClass(Scene3D.Scene3DRenderAll)
     renderSubmit(): number {
+        //BEGIN("Scene3DRender");
+        //END("Scene3DRender");
         if (this._renderByEditor) return 1;
         BufferState._curBindedBufferState && BufferState._curBindedBufferState.unBind();
+        PERF_BEGIN("Scene3D,renderSubmit,renderPre");
         this._prepareSceneToRender();
+        PERF_END("Scene3D,renderSubmit,renderPre");
         var i: number, n: number, n1: number;
         Scene3D._updateMark++;
         // if (this._sceneUniformData) {
         // 	this._sceneUniformObj && this._sceneUniformObj.setDataByUniformBufferData(this._sceneUniformData);
         // }
+        PERF_BEGIN("Scene3D,renderSubmit,CameraRender");
         for (i = 0, n = this._cameraPool.length, n1 = n - 1; i < n; i++) {
             // if (Render.supportWebGLPlusRendering)
             // 	ShaderData.setRuntimeValueMode((i == n1) ? true : false);
@@ -1537,6 +1546,7 @@ export class Scene3D extends Sprite implements ISubmit {
             }
 
         }
+        PERF_END("Scene3D,renderSubmit,CameraRender");
         Context.set2DRenderConfig();//还原2D配置
         RenderTexture.clearPool();
         return 1;
