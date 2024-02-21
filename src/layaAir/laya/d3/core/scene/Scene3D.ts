@@ -72,7 +72,7 @@ import { Laya3DRender } from "../../RenderObjs/Laya3DRender";
 import { IElementComponentManager } from "./IScenceComponentManager";
 import { ISceneRenderManager } from "../../../RenderEngine/RenderInterface/RenderPipelineInterface/ISceneRenderManager";
 import { regClass } from "../../../../Decorators";
-import { PERF_BEGIN, PERF_END } from "../../PerformanceTool";
+import {PERF_BEGIN, PERF_END, PERF_STAT, PerformanceDefine} from "../PerformanceTool";
 
 export enum FogMode {
     Linear = 0, //Linear
@@ -287,7 +287,7 @@ export class Scene3D extends Sprite implements ISubmit {
     /**
      * create Scene UniformBuffer
      * @internal
-     * @returns 
+     * @returns
      */
     static createSceneUniformBlock(): UnifromBufferData {
         if (!Scene3D.SceneUBOData) {
@@ -1110,7 +1110,7 @@ export class Scene3D extends Sprite implements ISubmit {
     }
     /**
      * scence外的Camera渲染场景,需要设置这个接口
-     * @param camera 
+     * @param camera
      */
     _setCullCamera(camera: Camera) {
         this._cullInfoCamera = camera;
@@ -1174,8 +1174,8 @@ export class Scene3D extends Sprite implements ISubmit {
 
     /**
      * @internal
-     * @param cullInfo 
-     * @param context 
+     * @param cullInfo
+     * @param context
      */
     _directLightShadowCull(cullInfo: IShadowCullInfo, context: RenderContext3D) {
         this._clearRenderQueue();
@@ -1194,8 +1194,8 @@ export class Scene3D extends Sprite implements ISubmit {
 
     /**
      * @internal
-     * @param cameraCullInfo 
-     * @param context 
+     * @param cameraCullInfo
+     * @param context
      */
     _sportLightShadowCull(cameraCullInfo: ICameraCullInfo, context: RenderContext3D) {
         this._clearRenderQueue();
@@ -1486,7 +1486,7 @@ export class Scene3D extends Sprite implements ISubmit {
 
     /**
      * 获得某个组件的管理器
-     * @param type 
+     * @param type
      */
     getComponentElementManager(type: string) {
         return this.componentElementMap.get(type);
@@ -1503,25 +1503,24 @@ export class Scene3D extends Sprite implements ISubmit {
         }
     }
 
-    static Scene3DRenderAll: string;
     /**
      * 渲染入口
      */
-    //@regClass(Scene3D.Scene3DRenderAll)
+    @PERF_STAT("SCENE3D_RENDER")
     renderSubmit(): number {
         //BEGIN("Scene3DRender");
         //END("Scene3DRender");
         if (this._renderByEditor) return 1;
         BufferState._curBindedBufferState && BufferState._curBindedBufferState.unBind();
-        PERF_BEGIN("Scene3D,renderSubmit,renderPre");
+        PERF_BEGIN(PerformanceDefine.SCENE3D_RENDERPRE);
         this._prepareSceneToRender();
-        PERF_END("Scene3D,renderSubmit,renderPre");
+        PERF_END(PerformanceDefine.SCENE3D_RENDERPRE);
         var i: number, n: number, n1: number;
         Scene3D._updateMark++;
         // if (this._sceneUniformData) {
         // 	this._sceneUniformObj && this._sceneUniformObj.setDataByUniformBufferData(this._sceneUniformData);
         // }
-        PERF_BEGIN("Scene3D,renderSubmit,CameraRender");
+        PERF_BEGIN(PerformanceDefine.SCENE3D_RENDERCAM);
         for (i = 0, n = this._cameraPool.length, n1 = n - 1; i < n; i++) {
             // if (Render.supportWebGLPlusRendering)
             // 	ShaderData.setRuntimeValueMode((i == n1) ? true : false);
@@ -1546,7 +1545,7 @@ export class Scene3D extends Sprite implements ISubmit {
             }
 
         }
-        PERF_END("Scene3D,renderSubmit,CameraRender");
+        PERF_END(PerformanceDefine.SCENE3D_RENDERCAM);
         Context.set2DRenderConfig();//还原2D配置
         RenderTexture.clearPool();
         return 1;
@@ -1554,10 +1553,10 @@ export class Scene3D extends Sprite implements ISubmit {
 
     /**
      * @internal
-     * @param source 
-     * @param normalizeViewPort 
-     * @param camera 
-     * @returns 
+     * @param source
+     * @param normalizeViewPort
+     * @param camera
+     * @returns
      */
     blitMainCanvans(source: BaseTexture, normalizeViewPort: Viewport, camera: Camera) {
         if (!source)
