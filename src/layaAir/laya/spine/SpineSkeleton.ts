@@ -6,8 +6,11 @@ import { SoundManager } from "../media/SoundManager";
 import { Loader } from "../net/Loader";
 import { Handler } from "../utils/Handler";
 import { ExternalSkin } from "./ExternalSkin";
+
 import { SpineSkeletonRenderer } from "./SpineSkeletonRenderer";
 import { SpineTemplet } from "./SpineTemplet";
+import { ISpineOptimizeRender } from "./optimize/interface/ISpineOptimizeRender";
+
 
 /**动画开始播放调度
  * @eventType Event.PLAYED
@@ -211,6 +214,8 @@ export class SpineSkeleton extends Sprite {
         return SpineSkeleton.PLAYING;
     }
 
+    spineItem: ISpineOptimizeRender;
+
     /**
      * @internal
      * @protected
@@ -232,9 +237,10 @@ export class SpineSkeleton extends Sprite {
         this._stateData = new templet.ns.AnimationStateData(this._skeleton.data);
         // 动画状态类
         this._state = new templet.ns.AnimationState(this._stateData);
-        this._renerer = new SpineSkeletonRenderer(templet, false);
+        //this._renerer = new SpineSkeletonRenderer(templet, false);
         this._timeKeeper = new templet.ns.TimeKeeper();
-
+        //let sMesh=this._templet.slotManger.init(this._skeleton.drawOrder, this._templet,this._templet.mainTexture);
+        this.spineItem = this._templet.sketonOptimise._initSpineRender(this._skeleton, this._templet, this.graphics);
         let skinIndex = this._templet.getSkinIndexByName(this._skinName);
         if (skinIndex != -1)
             this.showSkinByIndex(skinIndex);
@@ -316,6 +322,7 @@ export class SpineSkeleton extends Sprite {
 
         if (force || this._pause || this._currAniName != animationName) {
             this._currAniName = animationName;
+            this.spineItem.play(animationName);
             // 设置执行哪个动画
             this._state.setAnimation(this.trackIndex, animationName, loop);
             // 设置起始和结束时间
@@ -355,10 +362,10 @@ export class SpineSkeleton extends Sprite {
         }
         // 计算骨骼的世界SRT(world SRT)
         this._skeleton.updateWorldTransform();
+        this.spineItem.render(this._currentPlayTime);
 
-        this.graphics.clear();
-        this._renerer.draw(this._skeleton, this.graphics, -1, -1);
-        //this._renerer.drawOld(this._skeleton, this.graphics, -1, -1);
+        // this.graphics.clear();
+        // this._renerer.drawOld(this._skeleton, this.graphics, -1, -1);
     }
 
     private _flushExtSkin() {
@@ -415,6 +422,7 @@ export class SpineSkeleton extends Sprite {
      * @param	skinIndex	皮肤索引
      */
     showSkinByIndex(skinIndex: number): void {
+        this.spineItem.setSkinIndex(skinIndex);
         let newSkine = this._skeleton.data.skins[skinIndex];
         this._skeleton.setSkin(newSkine);
         this._skeleton.setSlotsToSetupPose();
@@ -500,7 +508,7 @@ export class SpineSkeleton extends Sprite {
         this._skeleton = null;
         this._state.clearListeners();
         this._state = null;
-        this._renerer = null;
+        //this._renerer = null;
         this._currAniName = null;
         this._pause = true;
         this.timer.clear(this, this._update);
@@ -578,4 +586,10 @@ export class SpineSkeleton extends Sprite {
     setSlotAttachment(slotName: string, attachmentName: string) {
         this._skeleton.setAttachment(slotName, attachmentName);
     }
+}
+
+export enum ERenderType {
+    normal = 0,
+    boneGPU = 1,
+    rigidBody = 2,
 }
