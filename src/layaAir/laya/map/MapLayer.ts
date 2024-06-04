@@ -132,6 +132,8 @@ export class MapLayer extends Sprite {
 									tSprite.y = tSprite.relativeY = tObjectData.y;
 									break;
 							}
+							tSprite.name = tObjectData.name;
+							
 							this.addChild(tSprite);
 							this._gridSpriteArray.push(tSprite);
 							this._objDic[tObjectData.name] = tSprite;
@@ -534,7 +536,7 @@ export class MapLayer extends Sprite {
 		t.addChild(tSprite);
 		t._gridSpriteArray.push(tSprite);
 		t._dataDic[tObjectData.name] = tObjectData;
-		t._objDic[tObjectData.name] = tSprite;
+		t._objDic[tObjectData.name] = tSprite;	
 		return tSprite;
 	}
 
