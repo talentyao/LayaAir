@@ -1,0 +1,9 @@
+{
+    "typescript.format.enable": false,
+    "javascript.format.enable": false,
+    "prettier.printWidth": 380,
+    "prettier.enable": false,
+    "prettier.useEditorConfig": false,
+    "prettier.tabWidth": 4,
+    "prettier.useTabs": false
+}

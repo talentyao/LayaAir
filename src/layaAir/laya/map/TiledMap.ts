@@ -1,17 +1,17 @@
-import { MapLayer } from "./MapLayer"
-import { TileTexSet } from "./TileTexSet";
-import { GridSprite } from "./GridSprite";
-import { TileAniSprite } from "./TileAniSprite";
-import { IMap } from "./IMap";
-import { Rectangle } from "../maths/Rectangle";
-import { Sprite } from "../display/Sprite";
-import { Loader } from "../net/Loader";
-import { Handler } from "../utils/Handler";
 import { ILaya } from "../../ILaya";
-import { Texture } from "../resource/Texture";
-import { HTMLCanvas } from "../resource/HTMLCanvas";
+import { Sprite } from "../display/Sprite";
 import { Point } from "../maths/Point";
+import { Rectangle } from "../maths/Rectangle";
+import { Loader } from "../net/Loader";
 import { Context } from "../resource/Context";
+import { HTMLCanvas } from "../resource/HTMLCanvas";
+import { Texture } from "../resource/Texture";
+import { Handler } from "../utils/Handler";
+import { GridSprite } from "./GridSprite";
+import { IMap } from "./IMap";
+import { MapLayer } from "./MapLayer";
+import { TileAniSprite } from "./TileAniSprite";
+import { TileTexSet } from "./TileTexSet";
 
 /**
  * tiledMap是整个地图的核心
@@ -66,7 +66,7 @@ export class TiledMap {
     //地图的显示对象
     private _mapSprite: Sprite = null; //地图的显示对象
     private _layerArray: any[] = []; //这里保存所有的MapLayer对象
-    private _renderLayerArray: any[] = [];//这里保存需要渲染的MapLayer对象
+    private _renderLayerArray: any[] = []; //这里保存需要渲染的MapLayer对象
     private _gridArray: any[] = []; //保存所有的块数据
     //地图块相关的
     private _showGridKey: boolean = false; //是否显示块边界线（用来调试用）
@@ -145,9 +145,7 @@ export class TiledMap {
      */
     cacheAllAfterInit: boolean = false;
 
-    constructor() {
-
-    }
+    constructor() {}
 
     /**
      * 创建地图
@@ -171,8 +169,7 @@ export class TiledMap {
         this._completeHandler = completeHandler;
         if (viewRectPadding) {
             this._paddingRect.copyFrom(viewRectPadding);
-        }
-        else {
+        } else {
             this._paddingRect.setTo(0, 0, 0, 0);
         }
         if (gridSize) {
@@ -183,8 +180,7 @@ export class TiledMap {
         if (tIndex > -1) {
             this._resPath = mapName.substr(0, tIndex);
             this._pathArray = this._resPath.split("/");
-        }
-        else {
+        } else {
             this._resPath = "";
             this._pathArray = [];
         }
@@ -201,7 +197,7 @@ export class TiledMap {
     private onJsonComplete(e: any): void {
         this._mapSprite = new Sprite();
         ILaya.stage.addChild(this._mapSprite);
-        var tJsonData: any = this._jsonData = e;
+        var tJsonData: any = (this._jsonData = e);
 
         this._properties = tJsonData.properties;
         this._orientation = tJsonData.orientation;
@@ -281,8 +277,7 @@ export class TiledMap {
         if (tParentPathNum == 0) {
             if (this._pathArray.length > 0) {
                 tResultPath = resPath + "/" + relativePath;
-            }
-            else {
+            } else {
                 tResultPath = relativePath;
             }
 
@@ -295,8 +290,7 @@ export class TiledMap {
         for (i = 0; i < tSrcNum; i++) {
             if (i == 0) {
                 tResultPath += this._pathArray[i];
-            }
-            else {
+            } else {
                 tResultPath = tResultPath + "/" + this._pathArray[i];
             }
         }
@@ -341,8 +335,7 @@ export class TiledMap {
                 tTileTexSet.offY = tTileSet.titleoffsetY - (tTileTextureH - this._mapTileH);
                 //tTileTexSet.texture = Texture.create(tTexture, tTileSet.margin + (tTileTextureW + tTileSet.spacing) * j, tTileSet.margin + (tTileTextureH + tTileSet.spacing) * i, tTileTextureW, tTileTextureH);
                 tTileTexSet.texture = Texture.createFromTexture(tTexture, tTileSet.margin + (tTileTextureW + tTileSet.spacing) * j, tTileSet.margin + (tTileTextureH + tTileSet.spacing) * i, tTileTextureW, tTileTextureH);
-                if (this.antiCrack)
-                    this.adptTexture(tTileTexSet.texture);
+                if (this.antiCrack) this.adptTexture(tTileTexSet.texture);
                 this._tileTexSetArr.push(tTileTexSet);
                 tTileTexSet.gid = this._tileTexSetArr.length;
             }
@@ -353,8 +346,7 @@ export class TiledMap {
             this._loader.once("complete", this, this.onTextureComplete);
             var tPath: string = this.mergePath(this._resPath, tTileSet.image);
             this._loader.load(tPath, Loader.IMAGE, false);
-        }
-        else {
+        } else {
             this._currTileSet = null;
             this.initMap();
         }
@@ -430,8 +422,8 @@ export class TiledMap {
         //创建地图层级
         for (var tLayerLoop: number = 0; tLayerLoop < tLayerArray.length; tLayerLoop++) {
             var tLayerData: any = tLayerArray[tLayerLoop];
-            if (tLayerData.visible == true) //如果不显示，那么也没必要创建
-            {
+            if (tLayerData.visible == true) {
+                //如果不显示，那么也没必要创建
                 var tMapLayer: MapLayer = new MapLayer();
                 tMapLayer.init(tLayerData, this);
                 if (!this.enableMergeLayer) {
@@ -439,7 +431,7 @@ export class TiledMap {
                     this._renderLayerArray.push(tMapLayer);
                 } else {
                     tLayerTarLayerName = tMapLayer.getLayerProperties("layer");
-                    isFirst = isFirst || (!preLayer) || (tLayerTarLayerName != preLayerTarName);
+                    isFirst = isFirst || !preLayer || tLayerTarLayerName != preLayerTarName;
                     if (isFirst) {
                         isFirst = false;
                         tMapLayer.tarLayer = tMapLayer;
@@ -451,7 +443,6 @@ export class TiledMap {
                     }
                     preLayerTarName = tLayerTarLayerName;
                 }
-
 
                 this._layerArray.push(tMapLayer);
             }
@@ -578,8 +569,7 @@ export class TiledMap {
                     tAnimationSprite.setTileTextureSet(this._index.toString(), tTileTexSet);
                     tGridSprite.addAniSprite(tAnimationSprite);
                     tGridSprite.addChild(tAnimationSprite);
-                }
-                else {
+                } else {
                     tGridSprite.graphics.drawImage(tTileTexSet.texture, 0, 0, width, height);
                 }
                 tGridSprite.drawImageNum++;
@@ -604,8 +594,7 @@ export class TiledMap {
      * @param	scale
      */
     set scale(scale: number) {
-        if (scale <= 0)
-            return;
+        if (scale <= 0) return;
         this._scale = scale;
         this._viewPortWidth = this._rect.width / scale;
         this._viewPortHeight = this._rect.height / scale;
@@ -683,13 +672,13 @@ export class TiledMap {
         this._centerY = this._rect.y + this._rect.height * this._pivotScaleY;
         var posChanged: boolean = false;
         var preValue: number = this._viewPortX;
-        this._viewPortX = this._centerX - this._rect.width * this._pivotScaleX / this._scale;
+        this._viewPortX = this._centerX - (this._rect.width * this._pivotScaleX) / this._scale;
         if (preValue != this._viewPortX) {
             posChanged = true;
         } else {
             preValue = this._viewPortY;
         }
-        this._viewPortY = this._centerY - this._rect.height * this._pivotScaleY / this._scale;
+        this._viewPortY = this._centerY - (this._rect.height * this._pivotScaleY) / this._scale;
         if (!posChanged && preValue != this._viewPortY) {
             posChanged = true;
         }
@@ -729,8 +718,8 @@ export class TiledMap {
         var len: number = this._renderLayerArray.length;
         for (var i: number = 0; i < len; i++) {
             tMapLayer = this._renderLayerArray[i];
-            if (tMapLayer._gridSpriteArray.length > 0)
-                tMapLayer.updateGridPos();
+            if(tMapLayer.parent == null) continue;
+            tMapLayer.updateGridPos();
         }
     }
 
@@ -750,12 +739,12 @@ export class TiledMap {
             if (tSub > 0) {
                 for (j = this._mapLastRect.left; j < this._mapLastRect.left + tSub; j++) {
                     for (i = this._mapLastRect.top; i <= this._mapLastRect.bottom; i++) {
-                        this.hideGrid(j, i);
+                        // this.hideGrid(j, i);
+                        this.removeGrid(j, i);
                     }
                 }
             }
-        }
-        else {
+        } else {
             //增加
             tAdd = Math.min(this._mapLastRect.left, this._mapRect.right + 1) - this._mapRect.left;
             if (tAdd > 0) {
@@ -776,14 +765,14 @@ export class TiledMap {
                     }
                 }
             }
-        }
-        else {
+        } else {
             //裁剪
-            tSub = this._mapLastRect.right - this._mapRect.right
+            tSub = this._mapLastRect.right - this._mapRect.right;
             if (tSub > 0) {
                 for (j = this._mapRect.right + 1; j <= this._mapRect.right + tSub; j++) {
                     for (i = this._mapLastRect.top; i <= this._mapLastRect.bottom; i++) {
-                        this.hideGrid(j, i);
+                        // this.hideGrid(j, i);
+                        this.removeGrid(j, i);
                     }
                 }
             }
@@ -794,13 +783,12 @@ export class TiledMap {
             if (tSub > 0) {
                 for (i = this._mapLastRect.top; i < this._mapLastRect.top + tSub; i++) {
                     for (j = this._mapLastRect.left; j <= this._mapLastRect.right; j++) {
-                        this.hideGrid(j, i);
+                        // this.hideGrid(j, i);
+                        this.removeGrid(j, i);
                     }
                 }
             }
-
-        }
-        else {
+        } else {
             //增加
             tAdd = Math.min(this._mapLastRect.top, this._mapRect.bottom + 1) - this._mapRect.top;
             if (tAdd > 0) {
@@ -810,7 +798,6 @@ export class TiledMap {
                     }
                 }
             }
-
         }
         if (this._mapRect.bottom > this._mapLastRect.bottom) {
             //增加
@@ -822,14 +809,14 @@ export class TiledMap {
                     }
                 }
             }
-        }
-        else {
+        } else {
             //裁剪
-            tSub = this._mapLastRect.bottom - this._mapRect.bottom
+            tSub = this._mapLastRect.bottom - this._mapRect.bottom;
             if (tSub > 0) {
                 for (i = this._mapRect.bottom + 1; i <= this._mapRect.bottom + tSub; i++) {
                     for (j = this._mapLastRect.left; j <= this._mapLastRect.right; j++) {
-                        this.hideGrid(j, i);
+                        // this.hideGrid(j, i);
+                        this.removeGrid(j, i);
                     }
                 }
             }
@@ -846,14 +833,14 @@ export class TiledMap {
             return;
         }
         var i: number, j: number;
-        var tGridSprite: GridSprite
+        var tGridSprite: GridSprite;
         var tTempArray: any[] = this._gridArray[gridY][gridX];
         if (tTempArray == null) {
             tTempArray = this.getGridArray(gridX, gridY);
-        }
-        else {
+        } else {
             for (i = 0; i < tTempArray.length && i < this._layerArray.length; i++) {
                 var tLayerSprite: Sprite = this._layerArray[i];
+                if (tLayerSprite.parent == null) continue;
                 if (tLayerSprite && tTempArray[i]) {
                     tGridSprite = tTempArray[i];
                     if (tGridSprite.visible == false && tGridSprite.drawImageNum > 0) {
@@ -873,7 +860,6 @@ export class TiledMap {
                 this.cacheGridsArray(tempArr);
             }
         }
-
     }
     private static _tempCanvas: any;
     private cacheGridsArray(arr: any[]): void {
@@ -882,15 +868,14 @@ export class TiledMap {
             TiledMap._tempCanvas = new HTMLCanvas();
             var tx: Context = TiledMap._tempCanvas.context;
             if (!tx) {
-                tx = TiledMap._tempCanvas.getContext('2d');	//如果是webGL的话，这个会返回WebGLContext2D
+                tx = TiledMap._tempCanvas.getContext("2d"); //如果是webGL的话，这个会返回WebGLContext2D
 
                 //tx.__tx = 0;
                 //tx.__ty = 0;
             }
         }
         canvas = TiledMap._tempCanvas;
-        canvas.context.asBitmap = false
-
+        canvas.context.asBitmap = false;
 
         var i: number, len: number;
         len = arr.length;
@@ -908,7 +893,7 @@ export class TiledMap {
 
     private getGridArray(gridX: number, gridY: number): any[] {
         var i: number, j: number;
-        var tGridSprite: GridSprite
+        var tGridSprite: GridSprite;
         var tTempArray: any[] = this._gridArray[gridY][gridX];
         if (tTempArray == null) {
             tTempArray = this._gridArray[gridY][gridX] = [];
@@ -918,7 +903,7 @@ export class TiledMap {
             var tTop: number = 0;
             var tBottom: number = 0;
 
-            var tGridWidth: number = this._gridWidth
+            var tGridWidth: number = this._gridWidth;
             var tGridHeight: number = this._gridHeight;
             switch (this.orientation) {
                 case TiledMap.ORIENTATION_ISOMETRIC: //45度角
@@ -929,25 +914,24 @@ export class TiledMap {
                     var tLeft1: number, tRight1: number, tTop1: number, tBottom1: number;
                     break;
                 case TiledMap.ORIENTATION_STAGGERED: //45度交错地图
-                    tLeft = Math.floor(gridX * tGridWidth / this._mapTileW);
+                    tLeft = Math.floor((gridX * tGridWidth) / this._mapTileW);
                     tRight = Math.floor((gridX * tGridWidth + tGridWidth) / this._mapTileW);
-                    tTop = Math.floor(gridY * tGridHeight / (this._mapTileH / 2));
+                    tTop = Math.floor((gridY * tGridHeight) / (this._mapTileH / 2));
                     tBottom = Math.floor((gridY * tGridHeight + tGridHeight) / (this._mapTileH / 2));
                     break;
                 case TiledMap.ORIENTATION_ORTHOGONAL: //直角
-                    tLeft = Math.floor(gridX * tGridWidth / this._mapTileW);
+                    tLeft = Math.floor((gridX * tGridWidth) / this._mapTileW);
                     tRight = Math.floor((gridX * tGridWidth + tGridWidth) / this._mapTileW);
-                    tTop = Math.floor(gridY * tGridHeight / this._mapTileH);
+                    tTop = Math.floor((gridY * tGridHeight) / this._mapTileH);
                     tBottom = Math.floor((gridY * tGridHeight + tGridHeight) / this._mapTileH);
                     break;
                 case TiledMap.ORIENTATION_HEXAGONAL: //六边形
-                    var tHeight: number = this._mapTileH * 2 / 3;
-                    tLeft = Math.floor(gridX * tGridWidth / this._mapTileW);
+                    var tHeight: number = (this._mapTileH * 2) / 3;
+                    tLeft = Math.floor((gridX * tGridWidth) / this._mapTileW);
                     tRight = Math.ceil((gridX * tGridWidth + tGridWidth) / this._mapTileW);
-                    tTop = Math.floor(gridY * tGridHeight / tHeight);
+                    tTop = Math.floor((gridY * tGridHeight) / tHeight);
                     tBottom = Math.ceil((gridY * tGridHeight + tGridHeight) / tHeight);
                     break;
-
             }
 
             var tLayer: MapLayer = null;
@@ -955,7 +939,6 @@ export class TiledMap {
             var tDrawMapLayer: MapLayer;
             for (var z: number = 0; z < this._layerArray.length; z++) {
                 tLayer = this._layerArray[z];
-
                 if (this.enableMergeLayer) {
                     if (tLayer.tarLayer != tDrawMapLayer) {
                         tTGridSprite = null;
@@ -967,8 +950,7 @@ export class TiledMap {
                         //tDrawMapLayer.addChild(tTGridSprite);
                     }
                     tGridSprite = tTGridSprite;
-                }
-                else {
+                } else {
                     tGridSprite = tLayer.getDrawSprite(gridX, gridY);
                     tTempArray.push(tGridSprite);
                 }
@@ -1010,7 +992,7 @@ export class TiledMap {
                             for (j = 0; j <= i; j++) {
                                 var tIndexX: number = i - j;
                                 var tIndexY: number = j;
-                                var tIndexValue: number = (tIndexX - tIndexY) + this._mapW;
+                                var tIndexValue: number = tIndexX - tIndexY + this._mapW;
                                 if (tIndexValue > tLeft1 && tIndexValue <= tRight1) {
                                     if (tLayer.drawTileTexture(tGridSprite, tIndexX, tIndexY)) {
                                         tGridSprite.drawImageNum++;
@@ -1078,8 +1060,7 @@ export class TiledMap {
                 //没动画了GRID，保存为图片
                 if (!tGridSprite.isHaveAnimation) {
                     tGridSprite.autoSize = true;
-                    if (this.autoCache)
-                        tGridSprite.cacheAs = this.autoCacheType;
+                    if (this.autoCache) tGridSprite.cacheAs = this.autoCacheType;
                     tGridSprite.autoSize = false;
                 }
 
@@ -1095,8 +1076,6 @@ export class TiledMap {
                         tDrawMapLayer.addChild(tTGridSprite);
                     }
                 }
-
-
             }
             if (this.enableMergeLayer && this.showGridTextureCount) {
                 if (tTGridSprite) {
@@ -1121,12 +1100,35 @@ export class TiledMap {
             var tGridSprite: GridSprite;
             for (var i: number = 0; i < tTempArray.length; i++) {
                 tGridSprite = tTempArray[i];
-                if (tGridSprite.drawImageNum > 0) {
-                    if (tGridSprite != null) {
+                if (tGridSprite != null) {
+                    if (tGridSprite.drawImageNum > 0) {
                         tGridSprite.hide();
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * 移除指定的GRID
+     * @param	gridX
+     * @param	gridY
+     */
+    private removeGrid(gridX: number, gridY: number): void {
+        if (gridX < 0 || gridX >= this._gridW || gridY < 0 || gridY >= this._gridH) {
+            return;
+        }
+        var tTempArray: any[] = this._gridArray[gridY][gridX];
+        if (tTempArray) {
+            var tGridSprite: GridSprite;
+            for (var i: number = 0; i < tTempArray.length; i++) {
+                tGridSprite = tTempArray[i];
+                if (tGridSprite != null) {
+                    let layer = this._layerArray[i];
+                    layer.removeDrawSprite(gridX, gridY);
+                }
+            }
+            this._gridArray[gridY][gridX] = null;
         }
     }
 
@@ -1139,8 +1141,9 @@ export class TiledMap {
     getLayerObject(layerName: string, objectName: string): GridSprite {
         var tLayer: MapLayer = null;
         for (var i: number = 0; i < this._layerArray.length; i++) {
-            tLayer = this._layerArray[i];
-            if (tLayer.layerName == layerName) {
+            let layer = this._layerArray[i];
+            if (layer.layerName == layerName) {
+                tLayer = layer;
                 break;
             }
         }
@@ -1162,7 +1165,7 @@ export class TiledMap {
         var j: number = 0;
         var z: number = 0;
 
-        this._gridArray = []; //??这里因为跟LAYER中的数据重复，所以不做处理
+        this._gridArray = []; //这里因为跟LAYER中的数据重复，所以不做处理
         //清除子纹理
         var tTileTexSet: TileTexSet;
         for (i = 0; i < this._tileTexSetArr.length; i++) {
@@ -1409,7 +1412,6 @@ export class TiledMap {
         }
         return null;
     }
-
 }
 
 /**@internal */
@@ -1434,7 +1436,6 @@ class TileMapAniData {
 
 /**@internal */
 class TileSet {
-
     firstgid: number = 0;
     image: string = "";
     imageheight: number = 0;
