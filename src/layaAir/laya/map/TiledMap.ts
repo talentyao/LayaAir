@@ -145,7 +145,7 @@ export class TiledMap {
      */
     cacheAllAfterInit: boolean = false;
 
-    constructor() {}
+    constructor() { }
 
     /**
      * 创建地图
@@ -322,14 +322,17 @@ export class TiledMap {
         var tImageWidth: number = tTileSet.imagewidth;
         var tImageHeight: number = tTileSet.imageheight;
         var tFirstgid: number = tTileSet.firstgid;
+        var tTileCount: number = tTileSet.tilecount;
 
         var tTileWNum: number = Math.floor((tImageWidth - tTileSet.margin - tTileTextureW) / (tTileTextureW + tTileSet.spacing)) + 1;
         var tTileHNum: number = Math.floor((tImageHeight - tTileSet.margin - tTileTextureH) / (tTileTextureH + tTileSet.spacing)) + 1;
 
         var tTileTexSet: TileTexSet = null;
         this._texutreStartDic[tTileSet.image] = this._tileTexSetArr.length;
+        let count = 0;
         for (var i: number = 0; i < tTileHNum; i++) {
             for (var j: number = 0; j < tTileWNum; j++) {
+                if (count++ >= tTileCount) break; // 规避空格导致的影响
                 tTileTexSet = new TileTexSet();
                 tTileTexSet.offX = tTileSet.titleoffsetX;
                 tTileTexSet.offY = tTileSet.titleoffsetY - (tTileTextureH - this._mapTileH);
@@ -718,7 +721,7 @@ export class TiledMap {
         var len: number = this._renderLayerArray.length;
         for (var i: number = 0; i < len; i++) {
             tMapLayer = this._renderLayerArray[i];
-            if(tMapLayer.parent == null) continue;
+            if (tMapLayer.parent == null) continue;
             tMapLayer.updateGridPos();
         }
     }
@@ -1437,6 +1440,7 @@ class TileMapAniData {
 /**@internal */
 class TileSet {
     firstgid: number = 0;
+    tilecount: number = 0;
     image: string = "";
     imageheight: number = 0;
     imagewidth: number = 0;
@@ -1453,6 +1457,7 @@ class TileSet {
 
     init(data: any): void {
         this.firstgid = data.firstgid;
+        this.tilecount = data.tilecount;
         this.image = data.image;
         this.imageheight = data.imageheight;
         this.imagewidth = data.imagewidth;
