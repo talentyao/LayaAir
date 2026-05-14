@@ -1,23 +1,23 @@
-import { Sprite } from "./Sprite";
-import { BitmapFont } from "./BitmapFont";
-import { TextStyle } from "./css/TextStyle"
-import { Event } from "../events/Event"
-import { Point } from "../maths/Point"
-import { Rectangle } from "../maths/Rectangle"
-import { WordText } from "../utils/WordText"
-import { ILaya } from "../../ILaya";
 import { Config } from "../../Config";
-import { Utils } from "../utils/Utils";
-import { DrawRectCmd } from "./cmd/DrawRectCmd";
+import { ILaya } from "../../ILaya";
+import { HideFlags } from "../Const";
+import { Event } from "../events/Event";
 import { HtmlElement, HtmlElementType } from "../html/HtmlElement";
 import { HtmlLink } from "../html/HtmlLink";
-import { Pool } from "../utils/Pool";
-import { IHtmlObject } from "../html/IHtmlObject";
-import { HideFlags } from "../Const";
-import { HtmlParser } from "../html/HtmlParser";
-import { UBBParser } from "../html/UBBParser";
 import { HtmlParseOptions } from "../html/HtmlParseOptions";
+import { HtmlParser } from "../html/HtmlParser";
+import { IHtmlObject } from "../html/IHtmlObject";
+import { UBBParser } from "../html/UBBParser";
+import { Point } from "../maths/Point";
+import { Rectangle } from "../maths/Rectangle";
 import { Browser } from "../utils/Browser";
+import { Pool } from "../utils/Pool";
+import { Utils } from "../utils/Utils";
+import { WordText } from "../utils/WordText";
+import { BitmapFont } from "./BitmapFont";
+import { DrawRectCmd } from "./cmd/DrawRectCmd";
+import { TextStyle } from "./css/TextStyle";
+import { Sprite } from "./Sprite";
 
 /**
  * @en The Text class is used to create display objects to show text.
@@ -1400,9 +1400,8 @@ export class Text extends Sprite {
 
                 //如果换行位置是字母或标点符号，需要向前查找单词的边界，避免单词被拆开
                 //如果是标点符号，还需要保证不在行首
-                if (noBreakWord && ((ccode >= 65 && ccode <= 90) || (ccode >= 97 && ccode <= 122) //英文字符
-                    || (ccode >= 48 && ccode <= 57) // 0-9
-                    || (isPunc = punctuationChars.includes(ccode)))) {
+                let isAlphaNum = isAlphaNumRegex.test(cc);
+                if (noBreakWord && (isAlphaNum || (isPunc = punctuationChars.includes(ccode)))) {
                     let wb = part.length > 0 ? ((testResult = wordBoundaryTest.exec(part)) ? testResult.index : null) : 0;
                     if (wb > 0) { //边界在文本中间
                         if (wb > part.length - maxWordLength) { //限制字符个数，超过的不看做一个单词
@@ -1957,7 +1956,9 @@ function cleanCmd(cmd: ITextCmd, releaseObj: boolean) {
 }
 
 const emojiTest = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
-const wordBoundaryTest = /[a-zA-Z0-9\!-\+\/_]+$/;
+const isAlphaNumRegex = /[a-zA-Z0-9\u0400-\u052F]/;
+// 支持拉丁字母、数字、俄文（Cyrillic U+0400-U+052F）和部分符号
+const wordBoundaryTest = /[a-zA-Z0-9\u0400-\u052F\!-\+\/_]+$/;
 const punctuationChars = Array.from(".,，。、!！；;”’)）]】}》").map(char => char.charCodeAt(0));
 const normalizeCR = /\r\n/g;
 const escapeCharsPattern = /\\(\w)/g;
